@@ -47,6 +47,17 @@ python main.py
 
 既存の`pc_controller/`は旧CLI/Tkinter実装として残しています。
 
+## Pico 2 firmware
+
+Pico 2側は`pico2/`に追加しています。USB HID Mouse、トラックボール入力抽象、スクロールエンコーダ、10ボタン入力、ESP32-C3向けUARTプロトコル、RF managerスタブを含みます。
+
+```powershell
+cd pico2
+python -m platformio run
+```
+
+詳細は[pico2/README.md](pico2/README.md)を参照してください。
+
 書き込み:
 
 ```powershell

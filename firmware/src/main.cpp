@@ -22,6 +22,8 @@ void setup() {
   beginInputs();
   beginDisplay();
   bleManager.begin(appState);
+  Serial1.begin(PICO_UART_BAUD, SERIAL_8N1, PICO_UART_RX_PIN, PICO_UART_TX_PIN);
+  picoProtocol.begin(Serial1);
 
   DEBUG_LOG(F("Godhand ESP32-C3 controller ready"));
 }

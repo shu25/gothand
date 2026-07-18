@@ -12,4 +12,8 @@ class PicoProtocol {
 
  private:
   Stream* serial_ = nullptr;
+  String rx_;
+  uint32_t lastPacketMillis_ = 0;
+
+  void handleLine(AppState& state, const String& line);
 };

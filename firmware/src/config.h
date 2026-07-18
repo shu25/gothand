@@ -28,10 +28,15 @@ constexpr ButtonAction BUTTON_ACTIONS[BUTTON_COUNT] = {
     ButtonAction::MUTE,
 };
 
+constexpr uint32_t PICO_UART_BAUD = 115200;
+constexpr int PICO_UART_RX_PIN = 21;
+constexpr int PICO_UART_TX_PIN = 20;
+
 constexpr uint32_t INPUT_DEBOUNCE_MS = 25;
 constexpr uint32_t DISPLAY_REFRESH_MS = 80;
 constexpr uint32_t VOLUME_SCREEN_TIMEOUT_MS = 2500;
 constexpr uint32_t TELEMETRY_INTERVAL_MS = 250;
+constexpr uint32_t PICO_LINK_TIMEOUT_MS = 2500;
 constexpr uint8_t DEFAULT_FFT_BANDS = 16;
 constexpr uint8_t MAX_FFT_BANDS = 32;
 
