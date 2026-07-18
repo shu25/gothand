@@ -1,0 +1,36 @@
+{
+  "device": {
+    "esp32_name": "Godhand Controller",
+    "auto_connect": true,
+    "transport": "ble"
+  },
+  "audio": {
+    "fft_enabled": true,
+    "fft_bands": 16,
+    "fft_update_rate": 30,
+    "fft_sensitivity": 1.0,
+    "fft_smoothing": 0.75,
+    "silence_threshold": 0.02,
+    "silence_detection_seconds": 5.0,
+    "audio_detection_seconds": 1.0
+  },
+  "display": {
+    "default_screen": "AUTO",
+    "volume_display_seconds": 2.5,
+    "clock_format": "24h",
+    "brightness": 255
+  },
+  "controls": {
+    "esp_buttons": {
+      "1": "play_pause",
+      "2": "previous",
+      "3": "next",
+      "4": "mode_change",
+      "5": "mute"
+    }
+  },
+  "app": {
+    "start_with_windows": false,
+    "start_minimized": false
+  }
+}

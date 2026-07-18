@@ -85,11 +85,11 @@ CMD_UUID = "12345678-1234-1234-1234-1234567890ac"
 STATE_UUID = "12345678-1234-1234-1234-1234567890ad"
 
 DEFAULT_BUTTON_MAP = {
-    1: "prev",
-    2: "next",
-    3: "play_pause",
-    4: "mute",
-    5: "mode",
+    1: "play_pause",
+    2: "prev",
+    3: "next",
+    4: "mode",
+    5: "mute",
 }
 
 DEFAULT_DISPLAY_MODE = "fft"

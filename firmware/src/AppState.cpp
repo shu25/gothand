@@ -11,6 +11,16 @@ void AppState::changeVolume(int delta) {
   setVolume(volume + delta);
 }
 
+void AppState::queueEvent(const String& event) {
+  pendingEvent = event;
+}
+
+String AppState::consumeEvent() {
+  String event = pendingEvent;
+  pendingEvent = "";
+  return event;
+}
+
 void AppState::showVolumeTemporarily() {
   const uint32_t now = millis();
   if (displayMode != DisplayMode::VOLUME) {
@@ -41,6 +51,7 @@ void AppState::applyButtonAction(ButtonAction action) {
       break;
     case ButtonAction::MODE_CHANGE:
       cycleDisplayMode();
+      queueEvent(F("EVENT:BTN4"));
       break;
     case ButtonAction::MUTE:
       muted = !muted;

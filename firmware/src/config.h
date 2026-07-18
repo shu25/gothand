@@ -31,8 +31,14 @@ constexpr ButtonAction BUTTON_ACTIONS[BUTTON_COUNT] = {
 constexpr uint32_t INPUT_DEBOUNCE_MS = 25;
 constexpr uint32_t DISPLAY_REFRESH_MS = 80;
 constexpr uint32_t VOLUME_SCREEN_TIMEOUT_MS = 2500;
+constexpr uint32_t TELEMETRY_INTERVAL_MS = 250;
 constexpr uint8_t DEFAULT_FFT_BANDS = 16;
 constexpr uint8_t MAX_FFT_BANDS = 32;
+
+constexpr const char* BLE_DEVICE_NAME = "Godhand Controller";
+constexpr const char* SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab";
+constexpr const char* CMD_UUID = "12345678-1234-1234-1234-1234567890ac";
+constexpr const char* STATE_UUID = "12345678-1234-1234-1234-1234567890ad";
 
 constexpr bool DEBUG_LOG_ENABLED = true;
 

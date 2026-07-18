@@ -4,6 +4,8 @@ ESP32-C3 SuperMiniとRaspberry Pi Pico 2を組み合わせた、腕装着型マ�
 
 現在の実装はPhase 1で、ESP32-C3単体の音楽コントローラーUIをPlatformIO + Arduino Frameworkで構築しています。PC通信、Bluetooth、Pico 2連携は後続Phaseで実装できるよう、インターフェースだけを用意しています。
 
+ESP32-C3 firmwareにはBLE通信の初期実装も入り、PCからの`VOL`、`TIME`、`DISP`、`CLOCK`、`FFT`、`B:F:...`コマンド受信と、ESP32入力イベントのNotify送信に対応しています。
+
 ## 必要ライブラリ
 
 PlatformIOが`firmware/platformio.ini`から自動取得します。
@@ -24,6 +26,26 @@ pio run
 cd firmware
 python -m platformio run
 ```
+
+## PCアプリ
+
+新しいPC側アプリは`pc/`に分割実装しています。PySide6 GUI、設定JSON、ログ、FFT解析、音量制御、メディアキー送信、BLE transportの土台を含みます。
+
+依存関係:
+
+```powershell
+cd pc
+python -m pip install -r requirements.txt
+```
+
+起動:
+
+```powershell
+cd pc
+python main.py
+```
+
+既存の`pc_controller/`は旧CLI/Tkinter実装として残しています。
 
 書き込み:
 
@@ -85,7 +107,7 @@ pio device monitor
 ## 今後の実装予定
 
 - Phase 2: ESP32-C3とPC間のBLE通信
-- Phase 3: PC側音声キャプチャ、FFT解析、FFT送信
+- Phase 3: PC側音声キャプチャ、FFT解析、FFT送信の実機接続
 - Phase 4: 音声状態に応じたCLOCK/FFT自動切り替え
 - Phase 5: Pico 2側トラックボール、クリック、スクロール
 - Phase 6: ESP32-C3とPico 2間のUART通信

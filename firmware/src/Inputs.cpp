@@ -86,6 +86,7 @@ void updateInputs(AppState& state) {
 
   for (uint8_t i = 0; i < BUTTON_COUNT; ++i) {
     if (fell(buttons[i], BUTTON_PINS[i], now)) {
+      state.queueEvent("EVENT:BTN" + String(i + 1));
       state.applyButtonAction(BUTTON_ACTIONS[i]);
     }
   }
@@ -98,12 +99,14 @@ void updateInputs(AppState& state) {
 
   if (steps != 0) {
     state.changeVolume(steps * ENCODER_VOLUME_STEP);
+    state.queueEvent("EVENT:ENC:" + String(steps > 0 ? "+" : "-") + String(abs(steps)));
     Serial.print(F("VOL:"));
     Serial.println(state.volume);
   }
 
   if (fell(encoderButton, ENCODER_SW_PIN, now)) {
     state.applyButtonAction(ButtonAction::PLAY_PAUSE);
+    state.queueEvent(state.audioPlaying ? F("EVENT:PLAY") : F("EVENT:PAUSE"));
     Serial.println(state.audioPlaying ? F("PLAY") : F("PAUSE"));
   }
 }

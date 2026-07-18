@@ -22,9 +22,8 @@ void setup() {
   beginInputs();
   beginDisplay();
   bleManager.begin(appState);
-  pcProtocol.begin();
 
-  DEBUG_LOG(F("Godhand ESP32-C3 Phase 1 ready"));
+  DEBUG_LOG(F("Godhand ESP32-C3 controller ready"));
 }
 
 void loop() {

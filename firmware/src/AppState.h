@@ -28,6 +28,8 @@ struct AppState {
   bool pcConnected = false;
   bool picoConnected = false;
   bool audioPlaying = false;
+  bool clockEnabled = true;
+  char controlMode = 'A';
 
   uint32_t lastVolumeChange = 0;
   uint32_t lastAudioActivity = 0;
@@ -41,9 +43,12 @@ struct AppState {
   uint32_t clockSyncMillis = 0;
   uint32_t clockSecondsAtSync = 0;
   bool clockSynced = false;
+  String pendingEvent;
 
   void setVolume(int newVolume);
   void changeVolume(int delta);
+  void queueEvent(const String& event);
+  String consumeEvent();
   void showVolumeTemporarily();
   void togglePlayback();
   void applyButtonAction(ButtonAction action);
