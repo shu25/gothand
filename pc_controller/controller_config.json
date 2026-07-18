@@ -1,0 +1,10 @@
+{
+  "button_map": {
+    "1": "prev",
+    "2": "next",
+    "3": "play_pause",
+    "4": "mute",
+    "5": "mode"
+  },
+  "display_mode": "volume"
+}

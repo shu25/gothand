@@ -1,0 +1,39 @@
+#include <Arduino.h>
+
+#include "AppState.h"
+#include "BleManager.h"
+#include "DisplayUi.h"
+#include "Inputs.h"
+#include "PcProtocol.h"
+#include "PicoProtocol.h"
+#include "config.h"
+
+AppState appState;
+BleManager bleManager;
+PcProtocol pcProtocol;
+PicoProtocol picoProtocol;
+
+void setup() {
+  Serial.begin(SERIAL_BAUD);
+  delay(50);
+
+  appState.fftBandCount = DEFAULT_FFT_BANDS;
+
+  beginInputs();
+  beginDisplay();
+  bleManager.begin(appState);
+  pcProtocol.begin();
+
+  DEBUG_LOG(F("Godhand ESP32-C3 Phase 1 ready"));
+}
+
+void loop() {
+  const uint32_t now = millis();
+
+  updateInputs(appState);
+  bleManager.update(appState);
+  pcProtocol.update(appState);
+  picoProtocol.update(appState);
+  appState.update(now);
+  updateDisplay(appState);
+}
