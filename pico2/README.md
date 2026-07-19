@@ -51,7 +51,7 @@ Pico GP1 RX <- ESP32 TX
 GND         <-> GND
 ```
 
-ESP32側の初期UARTピンは`firmware/src/config.h`の`PICO_UART_RX_PIN` / `PICO_UART_TX_PIN`で変更できます。
+ESP32側の初期UARTピンは`esp32/src/config.h`の`PICO_UART_RX_PIN` / `PICO_UART_TX_PIN`で変更できます。
 
 ## プロトコル
 

@@ -2,13 +2,13 @@
 
 ESP32-C3 SuperMiniとRaspberry Pi Pico 2を組み合わせた、腕装着型マウス兼音楽コントローラーの開発プロジェクトです。
 
-現在の実装はPhase 1で、ESP32-C3単体の音楽コントローラーUIをPlatformIO + Arduino Frameworkで構築しています。PC通信、Bluetooth、Pico 2連携は後続Phaseで実装できるよう、インターフェースだけを用意しています。
+ESP32-C3側は`esp32/`、Pico 2側は`pico2/`、PC側は`pc/`に分けています。
 
 ESP32-C3 firmwareにはBLE通信の初期実装も入り、PCからの`VOL`、`TIME`、`DISP`、`CLOCK`、`FFT`、`B:F:...`コマンド受信と、ESP32入力イベントのNotify送信に対応しています。
 
 ## 必要ライブラリ
 
-PlatformIOが`firmware/platformio.ini`から自動取得します。
+PlatformIOが`esp32/platformio.ini`から自動取得します。
 
 - Adafruit GFX Library
 - Adafruit SSD1306
@@ -16,14 +16,14 @@ PlatformIOが`firmware/platformio.ini`から自動取得します。
 ## ビルド方法
 
 ```powershell
-cd firmware
+cd esp32
 pio run
 ```
 
 `pio`がPATHにない環境では以下でも実行できます。
 
 ```powershell
-cd firmware
+cd esp32
 python -m platformio run
 ```
 
@@ -61,20 +61,20 @@ python -m platformio run
 書き込み:
 
 ```powershell
-cd firmware
+cd esp32
 pio run -t upload
 ```
 
 シリアルモニター:
 
 ```powershell
-cd firmware
+cd esp32
 pio device monitor
 ```
 
 ## 配線
 
-初期ピン設定は[firmware/src/config.h](firmware/src/config.h)に集約しています。ESP32-C3 SuperMiniの実ボード配線に合わせて必要に応じて変更してください。
+初期ピン設定は[esp32/src/config.h](esp32/src/config.h)に集約しています。ESP32-C3 SuperMiniの実ボード配線に合わせて必要に応じて変更してください。
 
 | 機能 | GPIO |
 | --- | --- |
@@ -106,14 +106,14 @@ pio device monitor
 
 | ファイル | 役割 |
 | --- | --- |
-| `firmware/src/main.cpp` | 初期化と非ブロッキングメインループ |
-| `firmware/src/config.h` | ピン、画面サイズ、タイムアウト、ボタン割り当て |
-| `firmware/src/AppState.*` | 表示モード、音量、接続状態、時計、FFT状態の管理 |
-| `firmware/src/DisplayUi.*` | SSD1306描画処理 |
-| `firmware/src/Inputs.*` | ロータリーエンコーダと5ボタンの入力処理 |
-| `firmware/src/BleManager.*` | Bluetooth実装予定のインターフェース |
-| `firmware/src/PcProtocol.*` | PC通信プロトコル実装予定のインターフェース |
-| `firmware/src/PicoProtocol.*` | Pico 2 UART連携実装予定のインターフェース |
+| `esp32/src/main.cpp` | 初期化と非ブロッキングメインループ |
+| `esp32/src/config.h` | ピン、画面サイズ、タイムアウト、ボタン割り当て |
+| `esp32/src/AppState.*` | 表示モード、音量、接続状態、時計、FFT状態の管理 |
+| `esp32/src/DisplayUi.*` | SSD1306描画処理 |
+| `esp32/src/Inputs.*` | ロータリーエンコーダと5ボタンの入力処理 |
+| `esp32/src/BleManager.*` | Bluetooth実装予定のインターフェース |
+| `esp32/src/PcProtocol.*` | PC通信プロトコル実装予定のインターフェース |
+| `esp32/src/PicoProtocol.*` | Pico 2 UART連携実装予定のインターフェース |
 
 ## 今後の実装予定
 
