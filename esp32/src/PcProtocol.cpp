@@ -29,14 +29,9 @@ DisplayMode parseDisplayMode(String value, DisplayMode fallback) {
   if (value == F("clock") || value == F("auto")) {
     return DisplayMode::CLOCK;
   }
-  if (value == F("fft") || value == F("wave")) {
-    return DisplayMode::FFT;
-  }
-  if (value == F("volume")) {
-    return DisplayMode::VOLUME;
-  }
-  if (value == F("status")) {
-    return DisplayMode::STATUS;
+  if (value == F("disc") || value == F("disk") || value == F("record") ||
+      value == F("fft") || value == F("wave") || value == F("status")) {
+    return DisplayMode::DISC;
   }
   return fallback;
 }
@@ -54,8 +49,32 @@ bool PcProtocol::handleLine(AppState& state, const String& line) {
   String text = line;
   text.trim();
 
+  if (text.startsWith(F("EVENT:"))) {
+    return true;
+  }
+
+  if (text == F("PLAY_PAUSE")) {
+    return true;
+  }
+
   if (text.startsWith(F("VOL:"))) {
     state.setVolume(text.substring(4).toInt());
+    state.muted = false;
+    return true;
+  }
+
+  if (text == F("MUTE")) {
+    state.muted = !state.muted;
+    state.showVolumeTemporarily();
+    return true;
+  }
+
+  if (text.startsWith(F("MUTE:"))) {
+    String value = text.substring(5);
+    value.trim();
+    value.toLowerCase();
+    state.muted = value == F("1") || value == F("on") || value == F("true");
+    state.showVolumeTemporarily();
     return true;
   }
 
@@ -92,18 +111,21 @@ bool PcProtocol::handleLine(AppState& state, const String& line) {
   if (text.startsWith(F("FFT:"))) {
     uint8_t band = 0;
     int start = 4;
-    while (band < state.fftBandCount && start >= 0 && start < text.length()) {
+    while (band < MAX_FFT_BANDS && start >= 0 && start < text.length()) {
       const int comma = text.indexOf(',', start);
       const String value = comma < 0 ? text.substring(start) : text.substring(start, comma);
       state.fftBars[band++] = constrain(value.toInt(), 0, 100);
       start = comma < 0 ? -1 : comma + 1;
     }
-    while (band < state.fftBandCount) {
+    const uint8_t parsedBands = band;
+    while (band < MAX_FFT_BANDS) {
       state.fftBars[band++] = 0;
     }
+    state.fftBandCount = max<uint8_t>(1, parsedBands);
     state.fftDataValid = true;
-    state.displayMode = DisplayMode::FFT;
-    state.previousDisplayMode = DisplayMode::FFT;
+    state.waveMode = false;
+    state.displayMode = DisplayMode::DISC;
+    state.previousDisplayMode = DisplayMode::DISC;
     return true;
   }
 
@@ -113,20 +135,23 @@ bool PcProtocol::handleLine(AppState& state, const String& line) {
       return false;
     }
     const int payloadEnd = text.indexOf(':', payloadStart + 1);
+    const char visualMode = payloadStart > 2 ? text.charAt(2) : 'F';
     const String payload = payloadEnd < 0
         ? text.substring(payloadStart + 1)
         : text.substring(payloadStart + 1, payloadEnd);
-    const uint8_t count = min<uint8_t>(state.fftBandCount, payload.length());
+    const uint8_t count = min<uint8_t>(MAX_FFT_BANDS, payload.length());
     for (uint8_t i = 0; i < count; ++i) {
       state.fftBars[i] = decodePackedValue(payload.charAt(i));
     }
-    for (uint8_t i = count; i < state.fftBandCount; ++i) {
+    for (uint8_t i = count; i < MAX_FFT_BANDS; ++i) {
       state.fftBars[i] = 0;
     }
+    state.fftBandCount = max<uint8_t>(1, count);
     state.fftDataValid = true;
+    state.waveMode = visualMode == 'W' || visualMode == 'w';
     state.lastAudioActivity = millis();
-    state.displayMode = DisplayMode::FFT;
-    state.previousDisplayMode = DisplayMode::FFT;
+    state.displayMode = DisplayMode::DISC;
+    state.previousDisplayMode = state.displayMode;
     return true;
   }
 

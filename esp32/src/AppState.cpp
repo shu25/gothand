@@ -8,6 +8,11 @@ void AppState::setVolume(int newVolume) {
 }
 
 void AppState::changeVolume(int delta) {
+  if (delta > 0) {
+    showFeedback(FeedbackIcon::VOLUME_UP);
+  } else if (delta < 0) {
+    showFeedback(FeedbackIcon::VOLUME_DOWN);
+  }
   setVolume(volume + delta);
 }
 
@@ -21,8 +26,19 @@ String AppState::consumeEvent() {
   return event;
 }
 
+void AppState::showFeedback(FeedbackIcon icon) {
+  feedbackIcon = icon;
+  feedbackUntil = millis() + 1000UL;
+}
+
 void AppState::showVolumeTemporarily() {
   const uint32_t now = millis();
+  if (displayMode == DisplayMode::DISC || displayMode == DisplayMode::FFT || displayMode == DisplayMode::WAVE) {
+    lastVolumeChange = now;
+    lastInputActivity = now;
+    return;
+  }
+
   if (displayMode != DisplayMode::VOLUME) {
     previousDisplayMode = displayMode;
   }
@@ -42,21 +58,27 @@ void AppState::applyButtonAction(ButtonAction action) {
   switch (action) {
     case ButtonAction::PLAY_PAUSE:
       togglePlayback();
+      showFeedback(FeedbackIcon::PLAYBACK);
       break;
     case ButtonAction::PREVIOUS_TRACK:
+      showFeedback(FeedbackIcon::PREVIOUS);
       Serial.println(F("ACTION:PREVIOUS_TRACK"));
       break;
     case ButtonAction::NEXT_TRACK:
+      showFeedback(FeedbackIcon::NEXT);
       Serial.println(F("ACTION:NEXT_TRACK"));
       break;
     case ButtonAction::MODE_CHANGE:
+      showFeedback(FeedbackIcon::MODE);
       cycleDisplayMode();
       queueEvent(F("EVENT:BTN4"));
       break;
     case ButtonAction::MUTE:
       muted = !muted;
+      showFeedback(FeedbackIcon::MUTE);
       break;
     case ButtonAction::CUSTOM:
+      showFeedback(FeedbackIcon::MODE);
       Serial.println(F("ACTION:CUSTOM"));
       break;
   }
@@ -65,11 +87,11 @@ void AppState::applyButtonAction(ButtonAction action) {
 void AppState::cycleDisplayMode() {
   switch (displayMode) {
     case DisplayMode::CLOCK:
-      displayMode = DisplayMode::FFT;
+      displayMode = DisplayMode::DISC;
       break;
     case DisplayMode::FFT:
-      displayMode = DisplayMode::STATUS;
-      break;
+    case DisplayMode::WAVE:
+    case DisplayMode::DISC:
     case DisplayMode::STATUS:
     case DisplayMode::VOLUME:
       displayMode = DisplayMode::CLOCK;

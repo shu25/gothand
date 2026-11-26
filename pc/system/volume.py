@@ -7,6 +7,7 @@ import sys
 class VolumeController:
     def __init__(self):
         self._endpoint = None
+        self._fallback_muted = False
 
     def _get_endpoint(self):
         if sys.platform != "win32":
@@ -45,16 +46,39 @@ class VolumeController:
             raw = int(volume * 0xFFFF) & 0xFFFF
             winmm.waveOutSetVolume(0xFFFFFFFF, (raw << 16) | raw)
 
+    def get_mute(self) -> bool:
+        endpoint = self._get_endpoint()
+        if endpoint is not None:
+            try:
+                return bool(endpoint.GetMute())
+            except Exception:
+                pass
+        return self._fallback_muted
+
     def change(self, delta: float) -> None:
         current = self.get()
         self.set((current if current is not None else 0.5) + delta)
 
-    def mute(self) -> None:
+    def mute(self) -> bool:
         endpoint = self._get_endpoint()
         if endpoint is not None:
             try:
                 current = bool(endpoint.GetMute())
-                endpoint.SetMute(not current, None)
+                muted = not current
+                endpoint.SetMute(muted, None)
+                self._fallback_muted = muted
+                return muted
+            except Exception:
+                pass
+        self._fallback_muted = not self._fallback_muted
+        return self._fallback_muted
+
+    def set_mute(self, muted: bool) -> None:
+        self._fallback_muted = bool(muted)
+        endpoint = self._get_endpoint()
+        if endpoint is not None:
+            try:
+                endpoint.SetMute(bool(muted), None)
                 return
             except Exception:
                 pass

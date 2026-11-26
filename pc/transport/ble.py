@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 from bleak import BleakClient, BleakScanner
 
 from transport.base import DeviceTransport
@@ -13,12 +15,18 @@ class BleTransport(DeviceTransport):
     def __init__(self, device_name: str = "Godhand Controller"):
         self.device_name = device_name
         self.client: BleakClient | None = None
+        self._send_lock = asyncio.Lock()
 
     async def connect(self) -> bool:
         devices = await BleakScanner.discover(timeout=5)
         target = None
         for device in devices:
-            if device.name == self.device_name or (device.name and "Godhand" in device.name):
+            uuids = []
+            metadata = getattr(device, "metadata", None)
+            if metadata is not None and hasattr(metadata, "get"):
+                uuids = metadata.get("uuids", [])
+            service_match = any(str(uuid).lower() == SERVICE_UUID.lower() for uuid in uuids)
+            if service_match or device.name == self.device_name or (device.name and "Godhand" in device.name):
                 target = device
                 break
         if target is None:
@@ -26,6 +34,11 @@ class BleTransport(DeviceTransport):
         self.client = BleakClient(target.address)
         await self.client.connect()
         await self.client.start_notify(STATE_UUID, self._handle_notify)
+        try:
+            value = await self.client.read_gatt_char(STATE_UUID)
+            self._handle_notify(0, bytearray(value))
+        except Exception:
+            pass
         return True
 
     async def disconnect(self) -> None:
@@ -35,7 +48,11 @@ class BleTransport(DeviceTransport):
     async def send(self, data: str) -> None:
         if self.client is None or not self.client.is_connected:
             return
-        await self.client.write_gatt_char(CMD_UUID, data.encode("utf-8"), response=False)
+        async with self._send_lock:
+            try:
+                await self.client.write_gatt_char(CMD_UUID, data.encode("utf-8"), response=False)
+            except Exception:
+                await self.client.write_gatt_char(CMD_UUID, data.encode("utf-8"), response=True)
 
     def _handle_notify(self, sender: int, data: bytearray) -> None:
         del sender

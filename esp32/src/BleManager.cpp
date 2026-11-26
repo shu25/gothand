@@ -14,11 +14,12 @@ const __FlashStringHelper* displayModeName(DisplayMode mode) {
     case DisplayMode::CLOCK:
       return F("clock");
     case DisplayMode::FFT:
-      return F("fft");
+    case DisplayMode::WAVE:
+    case DisplayMode::DISC:
+    case DisplayMode::STATUS:
+      return F("disc");
     case DisplayMode::VOLUME:
       return F("volume");
-    case DisplayMode::STATUS:
-      return F("status");
   }
   return F("clock");
 }
@@ -150,6 +151,8 @@ void BleManager::notifyState(const AppState& state) {
   telemetry += state.controlMode;
   telemetry += F("\nDISP:");
   telemetry += displayModeName(state.displayMode);
+  telemetry += F("\nMUTE:");
+  telemetry += state.muted ? F("1") : F("0");
 
   notify(telemetry);
 }

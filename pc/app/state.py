@@ -30,6 +30,7 @@ class DeviceState:
 @dataclass
 class AudioState:
     volume: int = 50
+    muted: bool = False
     playing: bool = False
     fft_enabled: bool = True
     fft_fps: int = 30

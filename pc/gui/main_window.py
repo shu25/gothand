@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Tana Controller")
         self.resize(860, 560)
         self.bars: list[QProgressBar] = []
+        self.fft_layout: QHBoxLayout | None = None
 
         tabs = QTabWidget()
         tabs.addTab(self._home_page(), "Home")
@@ -72,14 +73,8 @@ class MainWindow(QMainWindow):
         layout.addLayout(summary)
 
         fft_box = QGroupBox("FFT Debug")
-        fft_layout = QHBoxLayout(fft_box)
-        for _ in range(int(self.settings.get("audio.fft_bands", 16))):
-            bar = QProgressBar()
-            bar.setRange(0, 100)
-            bar.setOrientation(Qt.Vertical)
-            bar.setTextVisible(False)
-            fft_layout.addWidget(bar)
-            self.bars.append(bar)
+        self.fft_layout = QHBoxLayout(fft_box)
+        self._ensure_fft_bars(int(self.settings.get("audio.fft_bands", 16)))
         layout.addWidget(fft_box)
 
         self.log_view = QTextEdit()
@@ -149,7 +144,7 @@ class MainWindow(QMainWindow):
         layout = QFormLayout(page)
 
         self.default_screen = QComboBox()
-        self.default_screen.addItems(["AUTO", "CLOCK", "FFT", "STATUS"])
+        self.default_screen.addItems(["AUTO", "CLOCK", "DISK"])
         self.default_screen.setCurrentText(str(self.settings.get("display.default_screen", "AUTO")))
         self.default_screen.currentTextChanged.connect(
             lambda value: self.setting_changed.emit("display.default_screen", value)
@@ -165,20 +160,19 @@ class MainWindow(QMainWindow):
     def update_state(self, state: AppState) -> None:
         self.esp_status.setText(state.esp32.status.value)
         self.pico_status.setText(state.pico.status.value)
-        self.volume_label.setText(f"{state.audio.volume}%")
+        self.volume_label.setText(f"MUTE {state.audio.volume}%" if state.audio.muted else f"{state.audio.volume}%")
         self.media_label.setText("Playing" if state.audio.playing else "Paused")
         self.fft_label.setText(f"{state.audio.activity.value} / {state.audio.fft_fps} Hz")
         self.latency_label.setText("-" if state.esp32.latency_ms is None else f"{state.esp32.latency_ms} ms")
         self.volume_slider.setValue(state.audio.volume)
 
-        while len(self.bars) < len(state.audio.bars):
-            bar = QProgressBar()
-            bar.setRange(0, 100)
-            bar.setOrientation(Qt.Vertical)
-            bar.setTextVisible(False)
-            self.bars.append(bar)
+        self._ensure_fft_bars(len(state.audio.bars))
         for bar, value in zip(self.bars, state.audio.bars):
             bar.setValue(value)
+            bar.show()
+        for bar in self.bars[len(state.audio.bars):]:
+            bar.setValue(0)
+            bar.hide()
 
         self.device_detail.setText(
             f"ESP32-C3\n"
@@ -191,3 +185,15 @@ class MainWindow(QMainWindow):
             f"Last Packet: {state.pico.last_packet}"
         )
         self.log_view.setPlainText("\n".join(state.log_tail))
+
+    def _ensure_fft_bars(self, count: int) -> None:
+        if self.fft_layout is None:
+            return
+
+        while len(self.bars) < count:
+            bar = QProgressBar()
+            bar.setRange(0, 100)
+            bar.setOrientation(Qt.Vertical)
+            bar.setTextVisible(False)
+            self.fft_layout.addWidget(bar)
+            self.bars.append(bar)

@@ -99,7 +99,7 @@ void updateInputs(AppState& state) {
 
   if (steps != 0) {
     state.changeVolume(steps * ENCODER_VOLUME_STEP);
-    state.queueEvent("EVENT:ENC:" + String(steps > 0 ? "+" : "-") + String(abs(steps)));
+    state.queueEvent("EVENT:ENC:" + String(steps > 0 ? "+" : "-") + String(abs(steps)) + ":" + String(state.volume));
     Serial.print(F("VOL:"));
     Serial.println(state.volume);
   }
